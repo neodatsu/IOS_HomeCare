@@ -26,6 +26,9 @@ struct DashboardView: View {
     /// Service de gestion des activités
     @State private var activityService: ActivityService
     
+    /// Gestionnaire de consentement RGPD
+    @State private var consentManager = ConsentManager()
+    
     /// Indique si le menu est ouvert
     @State private var showMenu = false
     
@@ -362,6 +365,39 @@ struct DashboardView: View {
                     .accessibilityHint("Appuyez pour vous déconnecter de l'application")
                 } header: {
                     Text("Actions")
+                }
+                
+                // Section Légal
+                Section {
+                    NavigationLink {
+                        PrivacyPolicyView()
+                    } label: {
+                        Label("Confidentialité", systemImage: "hand.raised.fill")
+                    }
+                    .accessibilityLabel("Politique de confidentialité")
+                    
+                    NavigationLink {
+                        LegalView()
+                    } label: {
+                        Label("Mentions légales", systemImage: "doc.text.fill")
+                    }
+                    .accessibilityLabel("Mentions légales")
+                    
+                    Button(role: .destructive) {
+                        Task {
+                            showMenu = false
+                            // Déconnecter l'utilisateur
+                            await authService.logout()
+                            // Puis révoquer le consentement
+                            consentManager.revokeConsent()
+                        }
+                    } label: {
+                        Label("Révoquer mon consentement", systemImage: "hand.raised.slash.fill")
+                    }
+                    .accessibilityLabel("Révoquer le consentement RGPD")
+                    .accessibilityHint("Retire votre consentement et affiche à nouveau l'écran de consentement")
+                } header: {
+                    Text("Informations")
                 }
             }
             .navigationTitle("Menu")
