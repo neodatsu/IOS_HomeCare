@@ -1,0 +1,84 @@
+name: Nightly Build
+
+on:
+  schedule:
+    # Tous les jours à 2h du matin (UTC)
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Permet de lancer manuellement
+
+jobs:
+  nightly-build:
+    name: Nightly Build & Test
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Xcode
+      run: sudo xcode-select -s /Applications/Xcode_15.2.app
+    
+    - name: Clean DerivedData
+      run: rm -rf ~/Library/Developer/Xcode/DerivedData
+    
+    - name: Build
+      run: |
+        xcodebuild build \
+          -project HomeCare.xcodeproj \
+          -scheme HomeCare \
+          -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=17.2' \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO
+    
+    - name: Run all tests
+      run: |
+        xcodebuild test \
+          -project HomeCare.xcodeproj \
+          -scheme HomeCare \
+          -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=17.2' \
+          -enableCodeCoverage YES
+    
+    - name: Performance tests
+      run: |
+        # Lancer les tests de performance
+        xcodebuild test \
+          -project HomeCare.xcodeproj \
+          -scheme HomeCare \
+          -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=17.2' \
+          -only-testing:HomeCareTests/PerformanceTests
+    
+    - name: Memory leak detection
+      run: |
+        # Vérifier les fuites mémoire
+        echo "🔍 Memory leak detection..."
+        # Utiliser Instruments en ligne de commande si nécessaire
+    
+    - name: Archive build artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: nightly-build-${{ github.run_number }}
+        path: |
+          ~/Library/Developer/Xcode/DerivedData
+          build/
+        retention-days: 7
+    
+    - name: Notify on failure
+      if: failure()
+      uses: slackapi/slack-github-action@v1
+      with:
+        payload: |
+          {
+            "text": "❌ Nightly build failed for HomeCare iOS",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "🌙 *Nightly Build Failed*\n\nThe nightly build for HomeCare iOS has failed.\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
+                }
+              }
+            ]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -1,0 +1,88 @@
+# Configuration pour le labeler automatique des PRs
+
+# Views
+"🎨 UI":
+  - changed-files:
+    - any-glob-to-any-file: 
+      - 'HomeCare/Views/**/*.swift'
+      - 'HomeCare/**/*View.swift'
+
+# Models
+"📦 Models":
+  - changed-files:
+    - any-glob-to-any-file: 'HomeCare/Models/**/*.swift'
+
+# Services
+"⚙️ Services":
+  - changed-files:
+    - any-glob-to-any-file: 'HomeCare/Services/**/*.swift'
+
+# Tests
+"🧪 Tests":
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'HomeCareTests/**/*.swift'
+      - '**/*Tests.swift'
+
+# Documentation
+"📝 Documentation":
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+      - 'docs/**/*'
+
+# Configuration
+"🔧 Configuration":
+  - changed-files:
+    - any-glob-to-any-file:
+      - '*.yml'
+      - '*.yaml'
+      - '*.plist'
+      - '.swiftlint.yml'
+      - '.github/**/*'
+
+# Accessibilité
+"♿ Accessibility":
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*Accessibility*.swift'
+
+# Sécurité
+"🔐 Security":
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/AuthenticationService.swift'
+      - '**/ConsentManager.swift'
+      - '**/*Security*.swift'
+
+# Design
+"🎨 Design":
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/DESIGN*.md'
+      - '**/*Style*.swift'
+
+# Breaking Change
+"⚠️ Breaking Change":
+  - head-branch: ['^breaking/', 'breaking']
+
+# Bug Fix
+"🐛 Bug Fix":
+  - head-branch: ['^fix/', '^bugfix/', 'fix', 'bugfix']
+
+# Feature
+"✨ Feature":
+  - head-branch: ['^feature/', '^feat/', 'feature', 'feat']
+
+# Hotfix
+"🔥 Hotfix":
+  - head-branch: ['^hotfix/', 'hotfix']
+
+# Dependencies
+"📦 Dependencies":
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'Podfile'
+      - 'Podfile.lock'
+      - 'Package.swift'
+      - 'Package.resolved'

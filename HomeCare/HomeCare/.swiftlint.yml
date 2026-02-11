@@ -1,0 +1,112 @@
+# SwiftLint Configuration pour HomeCare
+
+# Règles désactivées
+disabled_rules:
+  - trailing_whitespace  # Espaces en fin de ligne
+  - todo                 # Permettre les TODO temporairement
+
+# Règles activées en option
+opt_in_rules:
+  - explicit_init
+  - explicit_acl
+  - closure_spacing
+  - sorted_imports
+  - vertical_whitespace_opening_braces
+  - vertical_whitespace_closing_braces
+
+# Chemins exclus
+excluded:
+  - Pods
+  - DerivedData
+  - .build
+  - Tests
+
+# Chemins inclus
+included:
+  - HomeCare
+
+# Longueur de ligne
+line_length:
+  warning: 120
+  error: 150
+  ignores_function_declarations: true
+  ignores_comments: true
+
+# Longueur de nom
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  max_length:
+    warning: 50
+    error: 60
+  excluded:
+    - id
+    - x
+    - y
+    - z
+    - i
+    - j
+    - k
+
+# Longueur de fichier
+file_length:
+  warning: 500
+  error: 800
+  ignore_comment_only_lines: true
+
+# Longueur de fonction
+function_body_length:
+  warning: 50
+  error: 100
+
+# Longueur de type
+type_body_length:
+  warning: 300
+  error: 500
+
+# Nombre de paramètres
+function_parameter_count:
+  warning: 5
+  error: 8
+
+# Complexité cyclomatique
+cyclomatic_complexity:
+  warning: 10
+  error: 15
+
+# Nesting (imbrication)
+nesting:
+  type_level:
+    warning: 2
+    error: 3
+  function_level:
+    warning: 3
+    error: 5
+
+# Règles personnalisées
+custom_rules:
+  # Pas de print() en production
+  no_print:
+    name: "No Print Statements"
+    regex: "\\bprint\\("
+    match_kinds:
+      - identifier
+    message: "Use os_log instead of print()"
+    severity: warning
+
+  # Forcer l'utilisation de self dans les closures
+  explicit_self_closure:
+    name: "Explicit Self in Closures"
+    regex: "\\{[^}]*(?:self\\.)?(?:self\\.)?\\w+\\s*=.*\\}"
+    message: "Use explicit self in closures"
+    severity: warning
+
+# Reporteur
+reporter: "github-actions-logging"
+
+# Stricte
+strict: false
+
+# Warnings as errors (pour CI/CD)
+warnings_as_errors: false

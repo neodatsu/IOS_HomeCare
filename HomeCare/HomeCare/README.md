@@ -87,8 +87,7 @@ HomeCare/
 │   └── PrivacyPolicyView.swift     # Politique de confidentialité
 └── Guides/
     ├── DESIGN_2026_GUIDE.md        # Guide du design moderne
-    ├── CLEAN_BUTTONS_GUIDE.md      # Bonnes pratiques boutons
-    └── DESIGN_IMPROVEMENTS.md      # Améliorations apportées
+    └── GITHUB_ACTIONS.md           # Configuration CI/CD
 ```
 
 ## 🚀 Installation
@@ -156,8 +155,7 @@ Contact : **contact@itercraft.com**
 
 ### Guides de design
 - **[Design 2026 Guide](DESIGN_2026_GUIDE.md)** - Guide complet du design moderne
-- **[Clean Buttons Guide](CLEAN_BUTTONS_GUIDE.md)** - Éviter les erreurs de design
-- **[Design Improvements](DESIGN_IMPROVEMENTS.md)** - Améliorations apportées
+- **[GitHub Actions](GITHUB_ACTIONS.md)** - Configuration CI/CD et workflows
 
 ### Exemples de code
 

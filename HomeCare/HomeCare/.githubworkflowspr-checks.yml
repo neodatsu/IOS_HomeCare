@@ -1,0 +1,209 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # Vérifications automatiques sur les PRs
+  pr-checks:
+    name: Pull Request Checks
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Pour l'analyse des changements
+    
+    - name: Verify PR title
+      uses: amannn/action-semantic-pull-request@v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Check for TODO comments
+      run: |
+        if grep -r "TODO\|FIXME" --include="*.swift" .; then
+          echo "⚠️ Warning: Found TODO or FIXME comments"
+          grep -rn "TODO\|FIXME" --include="*.swift" .
+        else
+          echo "✅ No TODO or FIXME comments found"
+        fi
+    
+    - name: Check file sizes
+      run: |
+        find . -name "*.swift" -size +1000k -exec ls -lh {} \; | \
+          awk '{print $9 " - " $5}' > large-files.txt
+        if [ -s large-files.txt ]; then
+          echo "⚠️ Warning: Large Swift files detected:"
+          cat large-files.txt
+        else
+          echo "✅ All Swift files are reasonably sized"
+        fi
+    
+    - name: Analyze changed files
+      run: |
+        git diff --name-only origin/${{ github.base_ref }}...HEAD | \
+          grep "\.swift$" > changed-swift-files.txt || true
+        if [ -s changed-swift-files.txt ]; then
+          echo "📝 Changed Swift files:"
+          cat changed-swift-files.txt
+          echo "CHANGED_FILES_COUNT=$(wc -l < changed-swift-files.txt)" >> $GITHUB_ENV
+        else
+          echo "No Swift files changed"
+          echo "CHANGED_FILES_COUNT=0" >> $GITHUB_ENV
+        fi
+    
+    - name: Comment file changes
+      if: env.CHANGED_FILES_COUNT > 0
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          const fs = require('fs');
+          const files = fs.readFileSync('changed-swift-files.txt', 'utf8');
+          const comment = `### 📝 Changed Swift Files\n\`\`\`\n${files}\`\`\`\n**Total: ${process.env.CHANGED_FILES_COUNT} files**`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+  # Vérification du code
+  code-quality:
+    name: Code Quality Check
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install SwiftLint
+      run: brew install swiftlint
+    
+    - name: SwiftLint with annotations
+      run: |
+        swiftlint lint --reporter github-actions-logging --strict
+    
+    - name: Check for print statements
+      run: |
+        if grep -r "print(" --include="*.swift" --exclude-dir="Tests" .; then
+          echo "⚠️ Warning: Found print() statements (consider using os_log)"
+          grep -rn "print(" --include="*.swift" --exclude-dir="Tests" .
+          exit 1
+        else
+          echo "✅ No print() statements found"
+        fi
+    
+    - name: Check for force unwrapping
+      run: |
+        FORCE_UNWRAPS=$(grep -r "!" --include="*.swift" --exclude-dir="Tests" . | grep -v "// " | wc -l)
+        if [ $FORCE_UNWRAPS -gt 50 ]; then
+          echo "⚠️ Warning: Found $FORCE_UNWRAPS force unwraps"
+          echo "Consider using optional binding instead"
+        else
+          echo "✅ Force unwraps count: $FORCE_UNWRAPS (acceptable)"
+        fi
+
+  # Test de build
+  build-check:
+    name: Build Check
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Xcode
+      run: sudo xcode-select -s /Applications/Xcode_15.2.app
+    
+    - name: Build
+      run: |
+        xcodebuild build \
+          -project HomeCare.xcodeproj \
+          -scheme HomeCare \
+          -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=17.2' \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO
+
+  # Vérification de l'accessibilité
+  accessibility-check:
+    name: Accessibility Check
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Check for accessibility labels
+      run: |
+        echo "🔍 Checking for accessibility implementation..."
+        
+        # Vérifier les labels d'accessibilité
+        if ! grep -r "accessibilityLabel" --include="*.swift" .; then
+          echo "⚠️ Warning: No accessibility labels found"
+        fi
+        
+        # Vérifier les hints
+        if ! grep -r "accessibilityHint" --include="*.swift" .; then
+          echo "⚠️ Warning: No accessibility hints found"
+        fi
+        
+        # Vérifier les traits
+        if ! grep -r "accessibilityAddTraits\|accessibilityRemoveTraits" --include="*.swift" .; then
+          echo "⚠️ Warning: No accessibility traits modifications found"
+        fi
+        
+        echo "✅ Accessibility check completed"
+
+  # Analyse de sécurité
+  security-check:
+    name: Security Check
+    runs-on: macos-14
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Check for hardcoded secrets
+      run: |
+        echo "🔐 Checking for hardcoded secrets..."
+        
+        # Recherche de patterns suspects
+        if grep -rE "password\s*=\s*\".*\"" --include="*.swift" .; then
+          echo "❌ ERROR: Potential hardcoded passwords found!"
+          exit 1
+        fi
+        
+        if grep -rE "apiKey\s*=\s*\".*\"" --include="*.swift" .; then
+          echo "❌ ERROR: Potential hardcoded API keys found!"
+          exit 1
+        fi
+        
+        if grep -rE "token\s*=\s*\".*\"" --include="*.swift" .; then
+          echo "❌ ERROR: Potential hardcoded tokens found!"
+          exit 1
+        fi
+        
+        echo "✅ No hardcoded secrets detected"
+    
+    - name: Check for UserDefaults security
+      run: |
+        echo "🔐 Checking UserDefaults usage..."
+        
+        if grep -r "UserDefaults" --include="*.swift" . | grep -i "password\|token\|key"; then
+          echo "⚠️ WARNING: Sensitive data might be stored in UserDefaults"
+          echo "Consider using Keychain instead"
+        fi
+
+  # Label automatique basé sur les fichiers modifiés
+  auto-label:
+    name: Auto Label PR
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/labeler@v5
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
