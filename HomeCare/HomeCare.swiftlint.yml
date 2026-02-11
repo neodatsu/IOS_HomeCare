@@ -1,0 +1,33 @@
+# Configuration SwiftLint pour HomeCare iOS
+
+# Fichiers à exclure
+excluded:
+  - Pods
+  - .build
+  - DerivedData
+  - .swiftpm
+
+# Règles désactivées (trop strictes)
+disabled_rules:
+  - explicit_acl
+  - explicit_self_closure
+  - no_print
+  - vertical_whitespace_opening_braces
+  - trailing_whitespace
+
+# Limites personnalisées
+line_length:
+  warning: 120
+  error: 150
+  ignores_comments: true
+
+function_body_length:
+  warning: 50
+  error: 100
+
+cyclomatic_complexity:
+  warning: 10
+  error: 20
+
+# Reporter pour Xcode
+reporter: "xcode"
