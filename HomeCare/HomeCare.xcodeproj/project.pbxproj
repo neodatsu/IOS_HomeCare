@@ -6,11 +6,59 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		6E92334C2F3D0666008EFF3B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E92334B2F3D0666008EFF3B /* WidgetKit.framework */; };
+		6E92334E2F3D0666008EFF3B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E92334D2F3D0666008EFF3B /* SwiftUI.framework */; };
+		6E92335D2F3D0667008EFF3B /* HomeCareWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6E9233492F3D0666008EFF3B /* HomeCareWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6E92335B2F3D0667008EFF3B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6ECA034A2F3B9EBA00D43ADD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6E9233482F3D0666008EFF3B;
+			remoteInfo = HomeCareWidgetsExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		6E9233622F3D0667008EFF3B /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				6E92335D2F3D0667008EFF3B /* HomeCareWidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		6E9233492F3D0666008EFF3B /* HomeCareWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HomeCareWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		6E92334B2F3D0666008EFF3B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		6E92334D2F3D0666008EFF3B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		6ECA03522F3B9EBA00D43ADD /* HomeCare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HomeCare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		6E9233612F3D0667008EFF3B /* Exceptions for "HomeCareWidgets" folder in "HomeCareWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6E9233482F3D0666008EFF3B /* HomeCareWidgetsExtension */;
+		};
+		6E9233642F3D078B008EFF3B /* Exceptions for "HomeCare" folder in "HomeCareWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ActivityTimerAttributes.swift,
+				ActivityTimerLiveActivity.swift,
+			);
+			target = 6E9233482F3D0666008EFF3B /* HomeCareWidgetsExtension */;
+		};
 		6ECA03712F3BA77300D43ADD /* Exceptions for "HomeCare" folder in "HomeCare" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -21,10 +69,19 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		6E92334F2F3D0666008EFF3B /* HomeCareWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6E9233612F3D0667008EFF3B /* Exceptions for "HomeCareWidgets" folder in "HomeCareWidgetsExtension" target */,
+			);
+			path = HomeCareWidgets;
+			sourceTree = "<group>";
+		};
 		6ECA03542F3B9EBA00D43ADD /* HomeCare */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				6ECA03712F3BA77300D43ADD /* Exceptions for "HomeCare" folder in "HomeCare" target */,
+				6E9233642F3D078B008EFF3B /* Exceptions for "HomeCare" folder in "HomeCareWidgetsExtension" target */,
 			);
 			path = HomeCare;
 			sourceTree = "<group>";
@@ -32,6 +89,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		6E9233462F3D0666008EFF3B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6E92334E2F3D0666008EFF3B /* SwiftUI.framework in Frameworks */,
+				6E92334C2F3D0666008EFF3B /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6ECA034F2F3B9EBA00D43ADD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -42,10 +108,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6E92334A2F3D0666008EFF3B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6E92334B2F3D0666008EFF3B /* WidgetKit.framework */,
+				6E92334D2F3D0666008EFF3B /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		6ECA03492F3B9EBA00D43ADD = {
 			isa = PBXGroup;
 			children = (
 				6ECA03542F3B9EBA00D43ADD /* HomeCare */,
+				6E92334F2F3D0666008EFF3B /* HomeCareWidgets */,
+				6E92334A2F3D0666008EFF3B /* Frameworks */,
 				6ECA03532F3B9EBA00D43ADD /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +131,7 @@
 			isa = PBXGroup;
 			children = (
 				6ECA03522F3B9EBA00D43ADD /* HomeCare.app */,
+				6E9233492F3D0666008EFF3B /* HomeCareWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,6 +139,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		6E9233482F3D0666008EFF3B /* HomeCareWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6E92335E2F3D0667008EFF3B /* Build configuration list for PBXNativeTarget "HomeCareWidgetsExtension" */;
+			buildPhases = (
+				6E9233452F3D0666008EFF3B /* Sources */,
+				6E9233462F3D0666008EFF3B /* Frameworks */,
+				6E9233472F3D0666008EFF3B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				6E92334F2F3D0666008EFF3B /* HomeCareWidgets */,
+			);
+			name = HomeCareWidgetsExtension;
+			packageProductDependencies = (
+			);
+			productName = HomeCareWidgetsExtension;
+			productReference = 6E9233492F3D0666008EFF3B /* HomeCareWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		6ECA03512F3B9EBA00D43ADD /* HomeCare */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6ECA035D2F3B9EBC00D43ADD /* Build configuration list for PBXNativeTarget "HomeCare" */;
@@ -68,10 +168,12 @@
 				6ECA034E2F3B9EBA00D43ADD /* Sources */,
 				6ECA034F2F3B9EBA00D43ADD /* Frameworks */,
 				6ECA03502F3B9EBA00D43ADD /* Resources */,
+				6E9233622F3D0667008EFF3B /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				6E92335C2F3D0667008EFF3B /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6ECA03542F3B9EBA00D43ADD /* HomeCare */,
@@ -93,6 +195,9 @@
 				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
+					6E9233482F3D0666008EFF3B = {
+						CreatedOnToolsVersion = 26.2;
+					};
 					6ECA03512F3B9EBA00D43ADD = {
 						CreatedOnToolsVersion = 26.2;
 					};
@@ -113,11 +218,19 @@
 			projectRoot = "";
 			targets = (
 				6ECA03512F3B9EBA00D43ADD /* HomeCare */,
+				6E9233482F3D0666008EFF3B /* HomeCareWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		6E9233472F3D0666008EFF3B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6ECA03502F3B9EBA00D43ADD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,6 +241,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		6E9233452F3D0666008EFF3B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6ECA034E2F3B9EBA00D43ADD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,7 +257,75 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		6E92335C2F3D0667008EFF3B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6E9233482F3D0666008EFF3B /* HomeCareWidgetsExtension */;
+			targetProxy = 6E92335B2F3D0667008EFF3B /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		6E92335F2F3D0667008EFF3B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 57U7UHT65X;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HomeCareWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HomeCareWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Itercraft.HomeCare.HomeCareWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6E9233602F3D0667008EFF3B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 57U7UHT65X;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HomeCareWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = HomeCareWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Itercraft.HomeCare.HomeCareWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		6ECA035B2F3B9EBC00D43ADD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -270,6 +458,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HomeCare/Info.plist;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -303,6 +492,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HomeCare/Info.plist;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -328,6 +518,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		6E92335E2F3D0667008EFF3B /* Build configuration list for PBXNativeTarget "HomeCareWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6E92335F2F3D0667008EFF3B /* Debug */,
+				6E9233602F3D0667008EFF3B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		6ECA034D2F3B9EBA00D43ADD /* Build configuration list for PBXProject "HomeCare" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

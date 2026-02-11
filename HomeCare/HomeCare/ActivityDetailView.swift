@@ -32,15 +32,6 @@ struct ActivityDetailView: View {
     /// Callback appelé lors du retour au dashboard
     let onDismiss: () -> Void
     
-    /// Temps écoulé en secondes
-    @State private var elapsedSeconds: Int = 0
-    
-    /// Timer pour mettre à jour le chronomètre
-    @State private var timer: Timer?
-    
-    /// Indique si le chronomètre est en pause
-    @State private var isPaused: Bool = false
-    
     /// Activité mise à jour avec le dernier état du serveur
     @State private var currentActivity: Activity
     
@@ -52,6 +43,14 @@ struct ActivityDetailView: View {
     
     /// Message d'erreur à afficher
     @State private var errorMessage = ""
+    
+    /// Timer pour rafraîchir l'affichage toutes les secondes
+    @State private var displayTimer: Timer?
+    
+    /// Gestionnaire de timer partagé
+    private var timerManager: TimerManager {
+        TimerManager.shared
+    }
     
     // MARK: - Initialization
     
@@ -100,9 +99,10 @@ struct ActivityDetailView: View {
             }
             .onAppear {
                 setupInitialState()
+                startDisplayTimer()
             }
             .onDisappear {
-                stopTimer()
+                stopDisplayTimer()
                 // Rafraîchir au retour
                 onDismiss()
             }
@@ -142,37 +142,39 @@ struct ActivityDetailView: View {
     
     /// Chronomètre numérique - Design moderne minimaliste
     private var chronometer: some View {
-        VStack(spacing: 16) {
-            // Grand chronomètre
-            Text(formattedTime)
-                .font(.system(size: 64, weight: .light, design: .rounded))
-                .foregroundColor(.primary)
-                .monospacedDigit()
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
+        TimelineView(.periodic(from: Date(), by: 1.0)) { _ in
+            let formatted = TimerManager.shared.formattedTime
             
-            // Indicateur d'état épuré
-            if currentActivity.isActive {
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(isPaused ? Color.orange : Color.green)
-                        .frame(width: 8, height: 8)
-                    
-                    Text(isPaused ? "En pause" : "En cours")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(isPaused ? .orange : .green)
+            VStack(spacing: 16) {
+                Text(formatted)
+                    .font(.system(size: 64, weight: .light, design: .rounded))
+                    .foregroundColor(.primary)
+                    .monospacedDigit()
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+                
+                if currentActivity.isActive {
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(TimerManager.shared.isPaused ? Color.orange : Color.green)
+                            .frame(width: 8, height: 8)
+                        
+                        Text(TimerManager.shared.isPaused ? "En pause" : "En cours")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(TimerManager.shared.isPaused ? .orange : .green)
+                    }
                 }
             }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 50)
+            .background(
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(Color(.secondarySystemBackground))
+            )
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Chronomètre. \(formatted)")
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 50)
-        .background(
-            RoundedRectangle(cornerRadius: 24)
-                .fill(Color(.secondarySystemBackground))
-        )
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Chronomètre. \(formattedTime). \(currentActivity.isActive ? (isPaused ? "En pause" : "Activité en cours") : "Activité arrêtée")")
     }
     
     /// Boutons de contrôle - Design 2026 minimaliste
@@ -260,28 +262,28 @@ struct ActivityDetailView: View {
                     togglePause()
                 } label: {
                     HStack(spacing: 12) {
-                        Image(systemName: isPaused ? "play.circle.fill" : "pause.circle.fill")
+                        Image(systemName: timerManager.isPaused ? "play.circle.fill" : "pause.circle.fill")
                             .font(.title2)
                         
-                        Text(isPaused ? "Reprendre" : "Pause")
+                        Text(timerManager.isPaused ? "Reprendre" : "Pause")
                             .font(.callout)
                             .fontWeight(.semibold)
                     }
-                    .foregroundColor(isPaused ? .green : .orange)
+                    .foregroundColor(timerManager.isPaused ? .green : .orange)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(
                         RoundedRectangle(cornerRadius: 14)
-                            .fill((isPaused ? Color.green : Color.orange).opacity(0.1))
+                            .fill((timerManager.isPaused ? Color.green : Color.orange).opacity(0.1))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 14)
-                            .stroke((isPaused ? Color.green : Color.orange).opacity(0.3), lineWidth: 2)
+                            .stroke((timerManager.isPaused ? Color.green : Color.orange).opacity(0.3), lineWidth: 2)
                     )
                 }
                 .buttonStyle(.plain)
                 .disabled(isLoading)
-                .accessibilityLabel(isPaused ? "Reprendre le chronomètre" : "Mettre en pause le chronomètre")
+                .accessibilityLabel(timerManager.isPaused ? "Reprendre le chronomètre" : "Mettre en pause le chronomètre")
                 .accessibilityHint("Pause locale, ne synchronise pas avec le serveur")
             }
         }
@@ -311,49 +313,47 @@ struct ActivityDetailView: View {
     
     // MARK: - Computed Properties
     
-    /// Temps formaté en HH:MM:SS
-    private var formattedTime: String {
-        let hours = elapsedSeconds / 3600
-        let minutes = (elapsedSeconds % 3600) / 60
-        let seconds = elapsedSeconds % 60
-        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-    }
+    // (Supprimé - formattedTime maintenant dans timerManager)
     
     // MARK: - Methods
     
     /// Configure l'état initial basé sur l'activité
     private func setupInitialState() {
-        // Toujours commencer à 0 pour un nouveau démarrage
-        elapsedSeconds = 0
-        
-        if currentActivity.isActive {
-            // Si l'activité est déjà en cours, calculer le temps écoulé depuis startedAt
+        // Si l'activité API est active mais que le timer manager ne l'est pas encore
+        if currentActivity.isActive, TimerManager.shared.activeServiceCode != currentActivity.serviceCode {
+            // Synchroniser avec le timer manager
             if let startedAt = currentActivity.startedAt {
-                elapsedSeconds = Int(Date().timeIntervalSince(startedAt))
-            }
-            startTimer()
-        }
-        // Sinon, rester à 0 et attendre que l'utilisateur clique sur Start
-    }
-    
-    /// Démarre le chronomètre
-    private func startTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            if !isPaused {
-                elapsedSeconds += 1
+                TimerManager.shared.startActivity(
+                    serviceCode: currentActivity.serviceCode,
+                    serviceLabel: currentActivity.serviceLabel,
+                    icon: currentActivity.icon,
+                    startDate: startedAt
+                )
             }
         }
     }
     
-    /// Arrête le chronomètre
-    private func stopTimer() {
-        timer?.invalidate()
-        timer = nil
+    /// Démarre le timer d'affichage pour rafraîchir l'interface
+    private func startDisplayTimer() {
+        displayTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak timerManager] _ in
+            // Force le rafraîchissement de l'UI en accédant à une propriété
+            _ = timerManager?.elapsedSeconds
+        }
+    }
+    
+    /// Arrête le timer d'affichage
+    private func stopDisplayTimer() {
+        displayTimer?.invalidate()
+        displayTimer = nil
     }
     
     /// Met en pause ou reprend le chronomètre (local seulement)
     private func togglePause() {
-        isPaused.toggle()
+        if timerManager.isPaused {
+            timerManager.resume()
+        } else {
+            timerManager.pause()
+        }
     }
     
     /// Démarre l'activité via l'API
@@ -372,13 +372,15 @@ struct ActivityDetailView: View {
                 if let updated = activityService.activities.first(where: { $0.serviceCode == currentActivity.serviceCode }) {
                     currentActivity = updated
                     
-                    // Démarrer le timer
-                    elapsedSeconds = 0
+                    // Démarrer le timer manager
                     if let startedAt = currentActivity.startedAt {
-                        elapsedSeconds = Int(Date().timeIntervalSince(startedAt))
+                        timerManager.startActivity(
+                            serviceCode: currentActivity.serviceCode,
+                            serviceLabel: currentActivity.serviceLabel,
+                            icon: currentActivity.icon,
+                            startDate: startedAt
+                        )
                     }
-                    isPaused = false
-                    startTimer()
                 }
                 
             } catch {
@@ -405,10 +407,8 @@ struct ActivityDetailView: View {
                     currentActivity = updated
                 }
                 
-                // Arrêter le timer et remettre à zéro
-                stopTimer()
-                isPaused = false
-                elapsedSeconds = 0  // ✅ Remettre le compteur à 0
+                // Arrêter le timer manager
+                timerManager.stopActivity()
                 
             } catch {
                 errorMessage = error.localizedDescription

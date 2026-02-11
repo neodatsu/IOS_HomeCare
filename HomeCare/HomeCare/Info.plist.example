@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 
+		EXEMPLE DE CONFIGURATION Info.plist pour HomeCare
+		
+		Copiez la clé NSSupportsLiveActivities dans votre Info.plist
+		pour activer les Live Activities
+	-->
+	
+	<!-- OBLIGATOIRE pour Live Activities -->
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	
+	<!-- 
+		Autres configurations possibles (optionnelles)
+	-->
+	
+	<!-- App Transport Security (si vous utilisez HTTP local) -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	
+	<!-- Description des permissions (si nécessaire) -->
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Nous utilisons les données pour améliorer votre expérience</string>
+	
+	<!-- Launch Screen (si vous en avez un) -->
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIImageName</key>
+		<string>LaunchImage</string>
+	</dict>
+	
+</dict>
+</plist>

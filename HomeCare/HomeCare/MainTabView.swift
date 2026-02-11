@@ -11,6 +11,8 @@ import SwiftUI
 ///
 /// Contient la navigation par onglets entre :
 /// - Le tableau de bord (activités)
+/// - Les récapitulatifs (totaux par période)
+/// - Le calendrier mensuel
 /// - Les badges et récompenses
 struct MainTabView: View {
     
@@ -26,6 +28,8 @@ struct MainTabView: View {
     
     enum Tab {
         case dashboard
+        case totals
+        case calendar
         case badges
     }
     
@@ -39,6 +43,20 @@ struct MainTabView: View {
                     Label("Accueil", systemImage: "house.fill")
                 }
                 .tag(Tab.dashboard)
+            
+            // Onglet Récapitulatifs
+            TotalsView(authService: authService)
+                .tabItem {
+                    Label("Récaps", systemImage: "chart.bar.fill")
+                }
+                .tag(Tab.totals)
+            
+            // Onglet Calendrier
+            CalendarView(authService: authService)
+                .tabItem {
+                    Label("Calendrier", systemImage: "calendar")
+                }
+                .tag(Tab.calendar)
             
             // Onglet Badges
             BadgesView(authService: authService)
