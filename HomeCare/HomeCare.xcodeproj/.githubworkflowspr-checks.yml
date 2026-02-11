@@ -1,0 +1,245 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+  XCODE_VERSION: '26.2'
+  IOS_VERSION: '26.0'
+  DEVICE: 'iPhone 17 Pro'
+
+jobs:
+  pr-validation:
+    name: PR Checks
+    runs-on: macos-15
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Validate PR title
+      uses: amannn/action-semantic-pull-request@v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Check for TODOs
+      run: |
+        echo "🔍 Checking for TODO comments..."
+        todos=$(grep -r "TODO\|FIXME\|XXX" HomeCare/HomeCare --include="*.swift" || echo "")
+        
+        if [ -n "$todos" ]; then
+          echo "⚠️ Found TODO/FIXME comments:"
+          echo "$todos"
+          echo "::warning::Consider addressing TODOs before merging"
+        else
+          echo "✅ No TODO comments found"
+        fi
+
+    - name: Check file sizes
+      run: |
+        echo "📊 Checking for large files..."
+        large_files=$(find HomeCare -type f -size +500k -not -path "*/DerivedData/*" || echo "")
+        
+        if [ -n "$large_files" ]; then
+          echo "⚠️ Large files found:"
+          echo "$large_files"
+          echo "::warning::Consider optimizing large files"
+        else
+          echo "✅ No unusually large files"
+        fi
+
+    - name: Check for merge conflicts
+      run: |
+        echo "🔍 Checking for merge conflict markers..."
+        conflicts=$(grep -r "<<<<<<\|>>>>>>\|======" HomeCare/HomeCare --include="*.swift" || echo "")
+        
+        if [ -n "$conflicts" ]; then
+          echo "❌ Merge conflict markers found!"
+          echo "$conflicts"
+          exit 1
+        else
+          echo "✅ No merge conflicts"
+        fi
+
+  code-quality:
+    name: Code Quality
+    runs-on: macos-15
+    timeout-minutes: 15
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install SwiftLint
+      run: brew install swiftlint
+
+    - name: Run SwiftLint (strict)
+      run: |
+        cd HomeCare
+        swiftlint lint --strict --reporter github-actions-logging
+      continue-on-error: true
+
+    - name: Check for print statements
+      run: |
+        echo "🔍 Checking for print() statements..."
+        prints=$(grep -r "print(" HomeCare/HomeCare --include="*.swift" | grep -v "// print" || echo "")
+        
+        if [ -n "$prints" ]; then
+          echo "⚠️ Found print() statements (should use proper logging):"
+          echo "$prints"
+          echo "::warning::Consider using os_log instead of print()"
+        else
+          echo "✅ No print() statements found"
+        fi
+
+    - name: Check for force unwraps
+      run: |
+        echo "🔍 Checking for force unwraps..."
+        force_unwraps=$(grep -r "!" HomeCare/HomeCare --include="*.swift" | \
+          grep -v "// swiftlint:disable:next force_unwrapping" | \
+          grep -E "\w+!" | wc -l || echo "0")
+        
+        echo "Found $force_unwraps potential force unwraps"
+        
+        if [ "$force_unwraps" -gt 10 ]; then
+          echo "::warning::High number of force unwraps detected. Consider using optional binding."
+        else
+          echo "✅ Force unwrap usage appears reasonable"
+        fi
+
+  build-check:
+    name: Build Check
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Select Xcode version
+      run: |
+        sudo xcode-select -switch $DEVELOPER_DIR
+        xcodebuild -version
+
+    - name: Cache DerivedData
+      uses: actions/cache@v4
+      with:
+        path: ~/Library/Developer/Xcode/DerivedData
+        key: ${{ runner.os }}-derived-data-${{ hashFiles('**/*.swift') }}
+        restore-keys: |
+          ${{ runner.os }}-derived-data-
+
+    - name: Build project
+      run: |
+        xcodebuild build \
+          -project HomeCare/HomeCare.xcodeproj \
+          -scheme HomeCare \
+          -destination "platform=iOS Simulator,name=${{ env.DEVICE }},OS=${{ env.IOS_VERSION }}" \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+
+  accessibility-check:
+    name: Accessibility Check
+    runs-on: macos-15
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check accessibility implementation
+      run: |
+        echo "♿ Checking accessibility implementation..."
+        
+        # Vérifier les labels
+        labels=$(grep -r "accessibilityLabel" HomeCare/HomeCare --include="*.swift" | wc -l || echo "0")
+        echo "Found $labels accessibility labels"
+        
+        # Vérifier les hints
+        hints=$(grep -r "accessibilityHint" HomeCare/HomeCare --include="*.swift" | wc -l || echo "0")
+        echo "Found $hints accessibility hints"
+        
+        # Vérifier les traits
+        traits=$(grep -r "accessibilityAddTraits\|accessibilityRemoveTraits" HomeCare/HomeCare --include="*.swift" | wc -l || echo "0")
+        echo "Found $traits accessibility trait modifications"
+        
+        if [ "$labels" -gt 0 ]; then
+          echo "✅ Accessibility labels found"
+        else
+          echo "::warning::No accessibility labels found. Consider adding them for VoiceOver support."
+        fi
+
+  security-check:
+    name: Security Check
+    runs-on: macos-15
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check for hardcoded secrets
+      run: |
+        echo "🔐 Checking for hardcoded secrets..."
+        
+        # Recherche de patterns suspects
+        secrets_found=false
+        
+        # API Keys
+        if grep -r "apiKey\s*=\s*\"" HomeCare/HomeCare --include="*.swift"; then
+          echo "::warning::Potential hardcoded API key found"
+          secrets_found=true
+        fi
+        
+        # Passwords
+        if grep -r "password\s*=\s*\"" HomeCare/HomeCare --include="*.swift" | grep -v "// Example"; then
+          echo "::warning::Potential hardcoded password found"
+          secrets_found=true
+        fi
+        
+        # Tokens
+        if grep -r "token\s*=\s*\"" HomeCare/HomeCare --include="*.swift" | grep -v "// Example"; then
+          echo "::warning::Potential hardcoded token found"
+          secrets_found=true
+        fi
+        
+        if [ "$secrets_found" = false ]; then
+          echo "✅ No obvious hardcoded secrets found"
+        fi
+
+    - name: Check UserDefaults usage
+      run: |
+        echo "🔍 Checking UserDefaults usage for sensitive data..."
+        
+        userdefaults=$(grep -r "UserDefaults" HomeCare/HomeCare --include="*.swift" | \
+          grep -E "password|token|secret|key" || echo "")
+        
+        if [ -n "$userdefaults" ]; then
+          echo "⚠️ Found potentially sensitive data in UserDefaults:"
+          echo "$userdefaults"
+          echo "::warning::Consider using Keychain for sensitive data instead of UserDefaults"
+        else
+          echo "✅ No sensitive data stored in UserDefaults"
+        fi
+
+  auto-label:
+    name: Auto Label
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Apply labels
+      uses: actions/labeler@v5
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        configuration-path: .github/labeler.yml
+      continue-on-error: true
