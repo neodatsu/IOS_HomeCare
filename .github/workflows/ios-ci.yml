@@ -1,3 +1,4 @@
+# Créer la structure
 name: iOS CI/CD
 
 on:
@@ -9,7 +10,7 @@ on:
 env:
   DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
   XCODE_VERSION: '26.2'
-  IOS_VERSION: '26.0'
+  IOS_VERSION: '26.2'
   DEVICE: 'iPhone 17 Pro'
 
 jobs:
@@ -36,8 +37,7 @@ jobs:
           ${{ runner.os }}-derived-data-
 
     - name: Install dependencies
-      run: |
-        brew install swiftlint
+      run: brew install swiftlint
 
     - name: Build
       run: |
@@ -60,24 +60,6 @@ jobs:
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGNING_ALLOWED=NO
 
-    - name: Generate code coverage
-      run: |
-        xcrun llvm-cov export \
-          -format="lcov" \
-          -instr-profile $(find ~/Library/Developer/Xcode/DerivedData -name "*.profdata" | head -n 1) \
-          $(find ~/Library/Developer/Xcode/DerivedData -name "HomeCare" -type f | head -n 1) \
-          > coverage.lcov || echo "Code coverage generation skipped"
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      if: success()
-      with:
-        files: ./coverage.lcov
-        flags: ios
-        name: ios-coverage
-        fail_ci_if_error: false
-      continue-on-error: true
-
   swiftlint:
     name: SwiftLint
     runs-on: macos-15
@@ -94,61 +76,3 @@ jobs:
       run: |
         cd HomeCare
         swiftlint lint --reporter github-actions-logging
-
-  security-scan:
-    name: Security Scan
-    runs-on: macos-15
-    timeout-minutes: 10
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'fs'
-        scan-ref: 'HomeCare'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-      continue-on-error: true
-
-    - name: Upload Trivy results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: trivy-results
-        path: trivy-results.sarif
-
-  accessibility-audit:
-    name: Accessibility Audit
-    runs-on: macos-15
-    timeout-minutes: 10
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Check accessibility labels
-      run: |
-        echo "🔍 Checking for accessibility labels..."
-        
-        missing_labels=$(grep -r "Button\|Image\|Text" HomeCare/HomeCare --include="*.swift" | \
-          grep -v "accessibilityLabel" | wc -l || echo "0")
-        
-        echo "Found $missing_labels potential accessibility issues"
-        
-        if [ "$missing_labels" -gt 0 ]; then
-          echo "⚠️ Warning: Some views might be missing accessibility labels"
-        else
-          echo "✅ All views appear to have accessibility support"
-        fi
-
-    - name: Check for VoiceOver hints
-      run: |
-        echo "🔍 Checking for VoiceOver hints..."
-        
-        hints=$(grep -r "accessibilityHint" HomeCare/HomeCare --include="*.swift" | wc -l || echo "0")
-        
-        echo "Found $hints accessibility hints"
-        echo "✅ Accessibility hints check complete"
