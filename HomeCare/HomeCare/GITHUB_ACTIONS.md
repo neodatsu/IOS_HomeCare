@@ -173,7 +173,7 @@ Ajoutez ces badges à votre README :
 
 Vérifiez que la version de Xcode 26.2 est bien installée :
 ```yaml
-DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
 ```
 
 ### Erreur : "Simulator not found"
@@ -488,7 +488,7 @@ Ajoutez ces badges à votre README :
 
 Vérifiez que la version de Xcode correspond :
 ```yaml
-DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
 ```
 
 ### Erreur : "Code signing failed"
