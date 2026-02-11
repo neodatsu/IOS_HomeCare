@@ -1,0 +1,154 @@
+name: iOS CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_26.2.app/Contents/Developer
+  XCODE_VERSION: '26.2'
+  IOS_VERSION: '26.0'
+  DEVICE: 'iPhone 17 Pro'
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Select Xcode version
+      run: |
+        sudo xcode-select -switch $DEVELOPER_DIR
+        xcodebuild -version
+
+    - name: Cache DerivedData
+      uses: actions/cache@v4
+      with:
+        path: ~/Library/Developer/Xcode/DerivedData
+        key: ${{ runner.os }}-derived-data-${{ hashFiles('**/*.swift') }}
+        restore-keys: |
+          ${{ runner.os }}-derived-data-
+
+    - name: Install dependencies
+      run: |
+        brew install swiftlint
+
+    - name: Build
+      run: |
+        xcodebuild build \
+          -project HomeCare/HomeCare.xcodeproj \
+          -scheme HomeCare \
+          -destination "platform=iOS Simulator,name=${{ env.DEVICE }},OS=${{ env.IOS_VERSION }}" \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+
+    - name: Run tests
+      run: |
+        xcodebuild test \
+          -project HomeCare/HomeCare.xcodeproj \
+          -scheme HomeCare \
+          -destination "platform=iOS Simulator,name=${{ env.DEVICE }},OS=${{ env.IOS_VERSION }}" \
+          -enableCodeCoverage YES \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+
+    - name: Generate code coverage
+      run: |
+        xcrun llvm-cov export \
+          -format="lcov" \
+          -instr-profile $(find ~/Library/Developer/Xcode/DerivedData -name "*.profdata" | head -n 1) \
+          $(find ~/Library/Developer/Xcode/DerivedData -name "HomeCare" -type f | head -n 1) \
+          > coverage.lcov || echo "Code coverage generation skipped"
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      if: success()
+      with:
+        files: ./coverage.lcov
+        flags: ios
+        name: ios-coverage
+        fail_ci_if_error: false
+      continue-on-error: true
+
+  swiftlint:
+    name: SwiftLint
+    runs-on: macos-15
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install SwiftLint
+      run: brew install swiftlint
+
+    - name: Run SwiftLint
+      run: |
+        cd HomeCare
+        swiftlint lint --reporter github-actions-logging
+
+  security-scan:
+    name: Security Scan
+    runs-on: macos-15
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: 'HomeCare'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+      continue-on-error: true
+
+    - name: Upload Trivy results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: trivy-results
+        path: trivy-results.sarif
+
+  accessibility-audit:
+    name: Accessibility Audit
+    runs-on: macos-15
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check accessibility labels
+      run: |
+        echo "🔍 Checking for accessibility labels..."
+        
+        missing_labels=$(grep -r "Button\|Image\|Text" HomeCare/HomeCare --include="*.swift" | \
+          grep -v "accessibilityLabel" | wc -l || echo "0")
+        
+        echo "Found $missing_labels potential accessibility issues"
+        
+        if [ "$missing_labels" -gt 0 ]; then
+          echo "⚠️ Warning: Some views might be missing accessibility labels"
+        else
+          echo "✅ All views appear to have accessibility support"
+        fi
+
+    - name: Check for VoiceOver hints
+      run: |
+        echo "🔍 Checking for VoiceOver hints..."
+        
+        hints=$(grep -r "accessibilityHint" HomeCare/HomeCare --include="*.swift" | wc -l || echo "0")
+        
+        echo "Found $hints accessibility hints"
+        echo "✅ Accessibility hints check complete"
