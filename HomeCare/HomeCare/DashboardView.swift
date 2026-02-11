@@ -26,8 +26,8 @@ struct DashboardView: View {
     /// Service de gestion des activités
     @State private var activityService: ActivityService
     
-    /// Gestionnaire de consentement RGPD
-    @State private var consentManager = ConsentManager()
+    /// Gestionnaire de consentement RGPD (injecté depuis l'environnement)
+    @Environment(ConsentManager.self) private var consentManager
     
     /// Indique si le menu est ouvert
     @State private var showMenu = false

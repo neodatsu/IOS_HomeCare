@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct HomeCareApp: App {
+    /// Gestionnaire de consentement partagé dans toute l'app
+    @State private var consentManager = ConsentManager()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(consentManager)
         }
     }
 }

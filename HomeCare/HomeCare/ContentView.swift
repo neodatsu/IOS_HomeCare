@@ -22,8 +22,8 @@ struct ContentView: View {
     /// Service d'authentification partagé
     @State private var authService = AuthenticationService()
     
-    /// Gestionnaire de consentement RGPD
-    @State private var consentManager = ConsentManager()
+    /// Gestionnaire de consentement RGPD (injecté depuis l'environnement)
+    @Environment(ConsentManager.self) private var consentManager
     
     // MARK: - Body
     
@@ -41,8 +41,8 @@ struct ContentView: View {
                     }
                 )
             } else if authService.isAuthenticated {
-                // Consentement donné + Authentifié → Dashboard
-                DashboardView(authService: authService)
+                // Consentement donné + Authentifié → TabBar principale
+                MainTabView(authService: authService)
             } else {
                 // Consentement donné + Non authentifié → Page d'accueil
                 HomeView(authService: authService)
@@ -55,4 +55,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environment(ConsentManager())
 }
