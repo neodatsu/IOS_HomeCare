@@ -62,47 +62,66 @@ struct ConsentView: View {
     
     // MARK: - Components
     
-    /// Dégradé de fond
+    /// Dégradé de fond avec effets de lumière améliorés
     private var backgroundGradient: some View {
-        LinearGradient(
-            gradient: Gradient(colors: [
-                Color.blue.opacity(0.05),
-                Color.purple.opacity(0.02)
-            ]),
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        ZStack {
+            // Couche de base avec des couleurs plus douces
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.95, green: 0.97, blue: 1.0),  // Bleu très pâle
+                    Color(red: 0.98, green: 0.96, blue: 1.0)   // Violet très pâle
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            
+            // Couche de lumière subtile
+            RadialGradient(
+                gradient: Gradient(colors: [
+                    Color.white.opacity(0.6),
+                    Color.clear
+                ]),
+                center: .top,
+                startRadius: 100,
+                endRadius: 500
+            )
+        }
         .ignoresSafeArea()
     }
     
-    /// Section d'en-tête
+    /// Section d'en-tête avec icône lisible
     private var headerSection: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "hand.raised.fill")
-                .font(.system(size: 70))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.blue, .purple],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+        VStack(spacing: 24) {
+            // Icône avec cercle lisible
+            ZStack {
+                Circle()
+                    .fill(Color.blue.opacity(0.15))
+                    .frame(width: 120, height: 120)
+                
+                Image(systemName: "hand.raised.fill")
+                    .font(.system(size: 50))
+                    .foregroundColor(.blue)  // Couleur unie pour meilleur contraste
+            }
             
-            Text("Confidentialité et données")
-                .font(.system(size: 32, weight: .bold, design: .rounded))
-                .multilineTextAlignment(.center)
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.blue, .purple],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-            
-            Text("Votre vie privée est importante pour nous")
-                .font(.headline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+            // Textes dans conteneur subtil
+            VStack(spacing: 10) {
+                Text("Confidentialité et données")
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.primary)
+                
+                Text("Votre vie privée est importante pour nous")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, 28)
+            .padding(.vertical, 20)
+            .background(
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+            )
         }
     }
     
@@ -129,14 +148,15 @@ struct ConsentView: View {
         }
     }
     
-    /// Section des droits de l'utilisateur
+    /// Section des droits de l'utilisateur avec design propre
     private var rightsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 18) {
             Text("Vos droits RGPD")
-                .font(.headline)
+                .font(.title3)
+                .fontWeight(.semibold)
                 .foregroundColor(.primary)
             
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 14) {
                 rightRow(icon: "eye.fill", text: "Accéder à vos données")
                 rightRow(icon: "pencil", text: "Rectifier vos données")
                 rightRow(icon: "trash.fill", text: "Supprimer vos données")
@@ -144,22 +164,23 @@ struct ConsentView: View {
                 rightRow(icon: "hand.raised.fill", text: "Vous opposer au traitement")
             }
             
-            Text("Contactez-nous à contact@itercraft.com pour exercer vos droits.")
+            Text("Contactez-nous à **contact@itercraft.com** pour exercer vos droits.")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .padding(.top, 8)
         }
-        .padding()
+        .padding(20)
         .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.secondarySystemBackground))
+            RoundedRectangle(cornerRadius: 18)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
         )
     }
     
-    /// Boutons d'action
+    /// Boutons d'action avec design propre
     private var actionButtons: some View {
         VStack(spacing: 16) {
-            // Bouton Accepter
+            // Bouton Accepter - Style simple et élégant
             Button {
                 onAccept()
             } label: {
@@ -175,42 +196,35 @@ struct ConsentView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 18)
                 .background(
-                    LinearGradient(
-                        colors: [.green, .blue],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(Color.green)
                 )
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .shadow(color: .green.opacity(0.3), radius: 10, x: 0, y: 5)
             }
+            .buttonStyle(.plain)
             .accessibilityLabel("J'accepte le traitement de mes données")
             .accessibilityHint("Appuyez pour accepter et continuer vers l'application")
             
-            // Bouton Refuser
+            // Bouton Refuser - Style secondaire
             Button {
                 onDecline()
             } label: {
                 HStack(spacing: 12) {
-                    Image(systemName: "xmark.circle")
+                    Image(systemName: "xmark.circle.fill")
                         .font(.title3)
                     
                     Text("Je refuse")
-                        .font(.body)
-                        .fontWeight(.medium)
+                        .font(.callout)
+                        .fontWeight(.semibold)
                 }
                 .foregroundColor(.red)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
+                .padding(.vertical, 16)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.red.opacity(0.1))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                        .stroke(Color.red, lineWidth: 2)
                 )
             }
+            .buttonStyle(.plain)
             .accessibilityLabel("Je refuse le traitement de mes données")
             .accessibilityHint("Appuyez pour refuser et quitter l'application")
         }
@@ -232,46 +246,58 @@ struct ConsentView: View {
     
     // MARK: - Helper Views
     
-    /// Carte d'information
+    /// Carte d'information avec icônes lisibles
     private func infoCard(icon: String, title: String, description: String) -> some View {
         HStack(spacing: 16) {
-            Image(systemName: icon)
-                .font(.title)
-                .foregroundColor(.blue)
-                .frame(width: 50)
+            // Icône dans un cercle avec bon contraste
+            ZStack {
+                Circle()
+                    .fill(Color.blue.opacity(0.15))
+                    .frame(width: 56, height: 56)
+                
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundColor(.blue)  // Couleur unie pour meilleur contraste
+            }
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(title)
                     .font(.headline)
                     .foregroundColor(.primary)
                 
                 Text(description)
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             
-            Spacer()
+            Spacer(minLength: 0)
         }
-        .padding()
+        .padding(16)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 16)
                 .fill(Color(.systemBackground))
-                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
         )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title). \(description)")
     }
     
-    /// Ligne de droit
+    /// Ligne de droit avec icônes lisibles
     private func rightRow(icon: String, text: String) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.caption)
-                .foregroundColor(.blue)
-                .frame(width: 20)
+        HStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(Color.blue.opacity(0.15))
+                    .frame(width: 32, height: 32)
+                
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.blue)  // Couleur unie pour meilleur contraste
+            }
             
             Text(text)
-                .font(.subheadline)
+                .font(.callout)
                 .foregroundColor(.primary)
             
             Spacer()

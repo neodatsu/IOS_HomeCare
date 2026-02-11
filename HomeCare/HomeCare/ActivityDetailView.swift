@@ -111,158 +111,150 @@ struct ActivityDetailView: View {
     
     // MARK: - Components
     
-    /// Dégradé de fond
+    /// Fond minimaliste moderne 2026
     private var backgroundGradient: some View {
-        LinearGradient(
-            gradient: Gradient(colors: [
-                Color.blue.opacity(0.05),
-                Color.purple.opacity(0.02)
-            ]),
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .ignoresSafeArea()
+        Color(.systemBackground)
+            .ignoresSafeArea()
     }
     
-    /// Icône de l'activité
+    /// Icône de l'activité - Design moderne épuré
     private var activityIcon: some View {
-        Image(systemName: activity.icon)
-            .font(.system(size: 80))
-            .foregroundStyle(
-                LinearGradient(
-                    colors: activity.isActive ? [.green, .blue] : [.blue, .purple],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .frame(width: 120, height: 120)
-            .background(
-                Circle()
-                    .fill(activity.isActive ? Color.green.opacity(0.1) : Color.blue.opacity(0.1))
-            )
-            .accessibilityHidden(true)
+        ZStack {
+            Circle()
+                .fill(activity.isActive ? Color.green.opacity(0.12) : Color.blue.opacity(0.12))
+                .frame(width: 100, height: 100)
+            
+            Image(systemName: activity.icon)
+                .font(.system(size: 50))
+                .foregroundColor(activity.isActive ? .green : .blue)
+        }
+        .accessibilityHidden(true)
     }
     
-    /// Titre de l'activité
+    /// Titre de l'activité - Minimaliste
     private var activityTitle: some View {
         Text(activity.serviceLabel)
-            .font(.system(size: 32, weight: .bold, design: .rounded))
-            .foregroundStyle(
-                LinearGradient(
-                    colors: [.blue, .purple],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
+            .font(.system(size: 24, weight: .semibold, design: .rounded))
+            .foregroundColor(.primary)
             .multilineTextAlignment(.center)
             .accessibilityAddTraits(.isHeader)
     }
     
-    /// Chronomètre numérique
+    /// Chronomètre numérique - Design moderne minimaliste
     private var chronometer: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
+            // Grand chronomètre
             Text(formattedTime)
-                .font(.system(size: 72, weight: .bold, design: .monospaced))
+                .font(.system(size: 64, weight: .light, design: .rounded))
                 .foregroundColor(.primary)
+                .monospacedDigit()
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
             
+            // Indicateur d'état épuré
             if currentActivity.isActive {
-                HStack(spacing: 4) {
+                HStack(spacing: 6) {
                     Circle()
                         .fill(isPaused ? Color.orange : Color.green)
-                        .frame(width: 12, height: 12)
+                        .frame(width: 8, height: 8)
                     
                     Text(isPaused ? "En pause" : "En cours")
-                        .font(.headline)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
                         .foregroundColor(isPaused ? .orange : .green)
                 }
             }
         }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 50)
+        .background(
+            RoundedRectangle(cornerRadius: 24)
+                .fill(Color(.secondarySystemBackground))
+        )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Chronomètre. \(formattedTime). \(currentActivity.isActive ? (isPaused ? "En pause" : "Activité en cours") : "Activité arrêtée")")
     }
     
-    /// Boutons de contrôle Start/Pause/Stop
+    /// Boutons de contrôle - Design 2026 minimaliste
     private var controlButtons: some View {
-        VStack(spacing: 16) {
-            HStack(spacing: 20) {
-                // Bouton Start
+        VStack(spacing: 14) {
+            HStack(spacing: 14) {
+                // Bouton Start - Minimaliste vert
                 Button {
                     startActivity()
                 } label: {
-                    HStack(spacing: 12) {
+                    VStack(spacing: 10) {
                         if isLoading && !currentActivity.isActive {
                             ProgressView()
                                 .progressViewStyle(.circular)
-                                .tint(.white)
+                                .tint(.green)
                         } else {
                             Image(systemName: "play.fill")
-                                .font(.title2)
+                                .font(.title)
+                                .foregroundColor(.green)
                         }
                         
                         Text("Start")
-                            .font(.title3)
-                            .fontWeight(.semibold)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.green)
                     }
-                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 20)
+                    .padding(.vertical, 24)
                     .background(
-                        LinearGradient(
-                            colors: [.green, .blue],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.green.opacity(0.1))
                     )
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: .green.opacity(0.3), radius: 10, x: 0, y: 5)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.green.opacity(currentActivity.isActive ? 0.2 : 0.4), lineWidth: 2)
+                    )
                 }
+                .buttonStyle(.plain)
                 .disabled(currentActivity.isActive || isLoading)
                 .opacity(currentActivity.isActive ? 0.5 : 1.0)
                 .accessibilityLabel("Démarrer l'activité")
                 .accessibilityHint(currentActivity.isActive ? "Activité déjà en cours" : "Appuyez pour démarrer le chronomètre")
-                .accessibilityAddTraits(.isButton)
                 
-                // Bouton Stop
+                // Bouton Stop - Minimaliste rouge
                 Button {
                     stopActivity()
                 } label: {
-                    HStack(spacing: 12) {
+                    VStack(spacing: 10) {
                         if isLoading && currentActivity.isActive {
                             ProgressView()
                                 .progressViewStyle(.circular)
-                                .tint(.white)
+                                .tint(.red)
                         } else {
                             Image(systemName: "stop.fill")
-                                .font(.title2)
+                                .font(.title)
+                                .foregroundColor(.red)
                         }
                         
                         Text("Stop")
-                            .font(.title3)
-                            .fontWeight(.semibold)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(.red)
                     }
-                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 20)
+                    .padding(.vertical, 24)
                     .background(
-                        LinearGradient(
-                            colors: [.red, .orange],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(Color.red.opacity(0.1))
                     )
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: .red.opacity(0.3), radius: 10, x: 0, y: 5)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.red.opacity(!currentActivity.isActive ? 0.2 : 0.4), lineWidth: 2)
+                    )
                 }
+                .buttonStyle(.plain)
                 .disabled(!currentActivity.isActive || isLoading)
                 .opacity(!currentActivity.isActive ? 0.5 : 1.0)
                 .accessibilityLabel("Arrêter l'activité")
                 .accessibilityHint(!currentActivity.isActive ? "Aucune activité en cours" : "Appuyez pour arrêter le chronomètre")
-                .accessibilityAddTraits(.isButton)
             }
             
-            // Bouton Pause (seulement si activité en cours)
+            // Bouton Pause - Minimaliste orange (seulement si activité en cours)
             if currentActivity.isActive {
                 Button {
                     togglePause()
@@ -272,26 +264,25 @@ struct ActivityDetailView: View {
                             .font(.title2)
                         
                         Text(isPaused ? "Reprendre" : "Pause")
-                            .font(.title3)
+                            .font(.callout)
                             .fontWeight(.semibold)
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(isPaused ? .green : .orange)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
+                    .padding(.vertical, 16)
                     .background(
-                        LinearGradient(
-                            colors: isPaused ? [.green, .blue] : [.orange, .yellow],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill((isPaused ? Color.green : Color.orange).opacity(0.1))
                     )
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: (isPaused ? Color.green : Color.orange).opacity(0.3), radius: 10, x: 0, y: 5)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke((isPaused ? Color.green : Color.orange).opacity(0.3), lineWidth: 2)
+                    )
                 }
+                .buttonStyle(.plain)
                 .disabled(isLoading)
                 .accessibilityLabel(isPaused ? "Reprendre le chronomètre" : "Mettre en pause le chronomètre")
                 .accessibilityHint("Pause locale, ne synchronise pas avec le serveur")
-                .accessibilityAddTraits(.isButton)
             }
         }
     }
@@ -429,7 +420,7 @@ struct ActivityDetailView: View {
 
 // MARK: - Stat Card Component
 
-/// Carte de statistique
+/// Carte de statistique - Design 2026 minimaliste
 private struct StatCard: View {
     let icon: String
     let title: String
@@ -444,6 +435,7 @@ private struct StatCard: View {
             
             Text(title)
                 .font(.caption)
+                .fontWeight(.medium)
                 .foregroundColor(.secondary)
             
             Text(value)
@@ -459,7 +451,7 @@ private struct StatCard: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(color.opacity(0.3), lineWidth: 1)
+                .stroke(color.opacity(0.3), lineWidth: 1.5)
         )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title): \(value)")

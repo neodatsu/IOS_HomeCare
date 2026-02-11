@@ -122,33 +122,47 @@ struct DashboardView: View {
     
     // MARK: - Components
     
-    /// Dégradé de fond adaptatif au mode d'apparence
+    /// Dégradé de fond adaptatif avec effets de lumière
     private var backgroundGradient: some View {
-        LinearGradient(
-            gradient: Gradient(colors: [
-                Color.blue.opacity(0.05),
-                Color.purple.opacity(0.02)
-            ]),
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        ZStack {
+            // Couche de base
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color.blue.opacity(0.15),
+                    Color.purple.opacity(0.08)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            
+            // Couche de lumière
+            RadialGradient(
+                gradient: Gradient(colors: [
+                    Color.white.opacity(0.1),
+                    Color.clear
+                ]),
+                center: .topTrailing,
+                startRadius: 50,
+                endRadius: 400
+            )
+        }
         .ignoresSafeArea()
     }
     
     /// Section de bienvenue avec le nom de l'utilisateur
     private var welcomeSection: some View {
-        VStack(spacing: 16) {
-            // Icône de profil
-            Image(systemName: "person.crop.circle.fill")
-                .font(.system(size: 80))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.blue, .purple],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .accessibilityHidden(true)
+        VStack(spacing: 20) {
+            // Icône de profil avec cercle propre
+            ZStack {
+                Circle()
+                    .fill(Color.blue.opacity(0.15))
+                    .frame(width: 100, height: 100)
+                
+                Image(systemName: "person.crop.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundColor(.blue)  // Couleur unie pour bon contraste
+            }
+            .accessibilityHidden(true)
             
             // Message de bienvenue
             VStack(spacing: 8) {
@@ -157,21 +171,15 @@ struct DashboardView: View {
                     .foregroundColor(.secondary)
                 
                 Text(userName)
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.blue, .purple],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
+                    .font(.system(size: 32, weight: .bold, design: .rounded))
+                    .foregroundColor(.primary)
                     .multilineTextAlignment(.center)
             }
             .accessibilityElement(children: .combine)
             .accessibilityLabel("Bonjour \(userName)")
             .accessibilityAddTraits(.isHeader)
         }
-        .padding(.top, 32)
+        .padding(.top, 20)
     }
     
     /// Contenu principal du tableau de bord
@@ -217,6 +225,11 @@ struct DashboardView: View {
                 .multilineTextAlignment(.center)
         }
         .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+        )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Aucune activité disponible")
     }
@@ -446,7 +459,7 @@ struct DashboardView: View {
 
 // MARK: - Activity Card Component
 
-/// Carte d'affichage d'une activité
+/// Carte d'affichage d'une activité avec design propre
 ///
 /// Composant réutilisable pour afficher une activité de maintenance
 /// avec son icône, son libellé et son temps passé.
@@ -460,25 +473,20 @@ private struct ActivityCard: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Icône
-            Image(systemName: activity.icon)
-                .font(.system(size: 32))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: activity.isActive ? [.green, .blue] : [.blue, .purple],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .frame(width: 50, height: 50)
-                .background(
-                    Circle()
-                        .fill(activity.isActive ? Color.green.opacity(0.1) : Color.blue.opacity(0.1))
-                )
-                .accessibilityHidden(true)
+            // Icône dans cercle avec bon contraste
+            ZStack {
+                Circle()
+                    .fill(activity.isActive ? Color.green.opacity(0.15) : Color.blue.opacity(0.15))
+                    .frame(width: 56, height: 56)
+                
+                Image(systemName: activity.icon)
+                    .font(.system(size: 28))
+                    .foregroundColor(activity.isActive ? .green : .blue)  // Couleur unie
+            }
+            .accessibilityHidden(true)
             
             // Informations
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(activity.serviceLabel)
                     .font(.headline)
                     .foregroundColor(.primary)
@@ -493,6 +501,7 @@ private struct ActivityCard: View {
                             Text("En cours")
                                 .font(.caption)
                                 .foregroundColor(.green)
+                                .fontWeight(.medium)
                         }
                     }
                     
@@ -515,11 +524,11 @@ private struct ActivityCard: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
-        .padding()
+        .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.systemBackground))
-                .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
+                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
         )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(activity.serviceLabel). \(activity.isActive ? "En cours. " : "")\(activity.totalMinutesToday > 0 ? "Temps aujourd'hui: \(activity.formattedTime)" : "Pas encore démarrée")")
@@ -545,29 +554,30 @@ private struct TotalCard: View {
     // MARK: - Body
     
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 10) {
             Image(systemName: icon)
                 .font(.title2)
                 .foregroundColor(color)
             
             Text(title)
                 .font(.caption)
+                .fontWeight(.medium)
                 .foregroundColor(.secondary)
             
             Text(time)
-                .font(.headline)
+                .font(.title3)
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
+        .padding(.vertical, 20)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(color.opacity(0.1))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(color.opacity(0.3), lineWidth: 1)
+                .stroke(color.opacity(0.3), lineWidth: 1.5)
         )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title): \(time)")
@@ -588,17 +598,22 @@ private struct ActivityTotalRow: View {
     // MARK: - Body
     
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             // En-tête avec icône et nom
             HStack(spacing: 12) {
-                Image(systemName: activityTotal.icon)
-                    .font(.title3)
-                    .foregroundColor(.blue)
-                    .frame(width: 30)
+                ZStack {
+                    Circle()
+                        .fill(Color.blue.opacity(0.15))
+                        .frame(width: 36, height: 36)
+                    
+                    Image(systemName: activityTotal.icon)
+                        .font(.system(size: 16))
+                        .foregroundColor(.blue)
+                }
                 
                 Text(activityTotal.serviceLabel)
                     .font(.subheadline)
-                    .fontWeight(.medium)
+                    .fontWeight(.semibold)
                 
                 Spacer()
             }
@@ -611,9 +626,9 @@ private struct ActivityTotalRow: View {
                 TimeBox(label: "A", time: activityTotal.formattedYear)
             }
         }
-        .padding()
+        .padding(16)
         .background(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.secondarySystemBackground))
         )
         .accessibilityElement(children: .combine)

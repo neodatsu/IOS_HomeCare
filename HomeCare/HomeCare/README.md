@@ -200,6 +200,20 @@ struct ActivityTests {
 }
 ```
 
+## 🎯 Roadmap
+
+### Version 1.1 (À venir)
+- [ ] Notifications push pour rappels
+- [ ] Widgets iOS pour vue rapide
+- [ ] Export PDF des statistiques
+- [ ] Mode hors ligne avec synchronisation
+
+### Version 1.2 (Futur)
+- [ ] Apple Watch app
+- [ ] Siri Shortcuts
+- [ ] Graphiques de tendances
+- [ ] Objectifs et badges
+
 ## 🤝 Contribution
 
 Les contributions sont les bienvenues ! Veuillez :

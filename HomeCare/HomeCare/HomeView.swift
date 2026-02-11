@@ -7,17 +7,17 @@
 
 import SwiftUI
 
-/// Vue d'accueil principale de l'application HomeCare
+/// Vue d'accueil principale de l'application HomeCare avec design Liquid Glass
 ///
 /// Affiche l'écran d'accueil avec :
 /// - Le logo de l'application (icône maison avec cœur)
 /// - Le nom de l'application "HomeCare"
 /// - Le sous-titre "by IterCraft"
-/// - Un bouton d'action principal pour commencer
+/// - Un bouton d'action principal pour commencer avec effet Liquid Glass
 /// - Un bouton de connexion via Keycloak
 ///
 /// Cette vue respecte les normes RGAA avec des labels accessibles,
-/// supporte Dynamic Type et le Dark Mode.
+/// supporte Dynamic Type et le Dark Mode, et utilise le design Liquid Glass moderne.
 struct HomeView: View {
     
     // MARK: - Properties
@@ -35,7 +35,7 @@ struct HomeView: View {
     
     var body: some View {
         ZStack {
-            // Fond avec dégradé
+            // Fond avec dégradé dynamique
             backgroundGradient
             
             VStack(spacing: 40) {
@@ -65,16 +65,30 @@ struct HomeView: View {
     
     // MARK: - Components
     
-    /// Dégradé de fond adaptatif au mode d'apparence
+    /// Fond moderne 2026 - Minimaliste et lumineux
     private var backgroundGradient: some View {
-        LinearGradient(
-            gradient: Gradient(colors: [
-                Color.blue.opacity(0.1),
-                Color.purple.opacity(0.05)
-            ]),
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+        ZStack {
+            // Fond ultra pâle
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color(red: 0.98, green: 0.99, blue: 1.0),
+                    Color(red: 0.99, green: 0.98, blue: 1.0)
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            
+            // Lumière subtile
+            RadialGradient(
+                gradient: Gradient(colors: [
+                    Color.white.opacity(0.8),
+                    Color.clear
+                ]),
+                center: .top,
+                startRadius: 100,
+                endRadius: 500
+            )
+        }
         .ignoresSafeArea()
     }
     
@@ -86,7 +100,7 @@ struct HomeView: View {
                 .font(.system(size: 100))
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [.blue, .purple],
+                        colors: [.blue, .indigo],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -99,7 +113,7 @@ struct HomeView: View {
                 .font(.system(size: 48, weight: .bold, design: .rounded))
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [.blue, .purple],
+                        colors: [.blue, .indigo],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -115,7 +129,7 @@ struct HomeView: View {
         }
     }
     
-    /// Bouton de connexion avec style gradient
+    /// Bouton de connexion avec style propre
     private var loginButton: some View {
         Button {
             Task {
@@ -140,13 +154,13 @@ struct HomeView: View {
             .padding(.vertical, 18)
             .background(
                 LinearGradient(
-                    colors: [.blue, .purple],
+                    colors: [.blue, .indigo],
                     startPoint: .leading,
                     endPoint: .trailing
                 )
             )
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .shadow(color: .blue.opacity(0.3), radius: 10, x: 0, y: 5)
+            .cornerRadius(16)
+            .shadow(color: .blue.opacity(0.3), radius: 8, x: 0, y: 4)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Me connecter")
